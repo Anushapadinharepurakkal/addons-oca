@@ -29,7 +29,7 @@ class ResUsers(models.Model):
 
     @tools.ormcache("self.id", "self.env.uid")
     def _get_group_ids(self):
-        if not self.env.user.bypass_role_policy:
+        if not self.bypass_role_policy:
             enabled_roles = self._get_enabled_roles()
             if enabled_roles:
                 groups = enabled_roles.mapped("role_id.group_id")

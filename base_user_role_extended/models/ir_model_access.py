@@ -24,7 +24,7 @@ class IrModelAccess(models.Model):
         For bypass users (admin/root) or users with no active roles:
           - Delegates to super() → standard all-groups resolution.
         """
-        if self.env.user.bypass_role_policy:
+        if self.env.user.bypass_role_policy or not self.env.user._get_enabled_roles():
             return super()._get_allowed_models(mode)
 
         # Check if role_group_ids is passed in context to bypass DB/compute
