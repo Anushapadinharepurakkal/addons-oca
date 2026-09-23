@@ -1,6 +1,6 @@
 # Copyright 2026 CIT Services
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
-from odoo import _, api, fields, models, tools
+from odoo import api, fields, models, tools
 from odoo.exceptions import AccessError
 
 
@@ -12,26 +12,25 @@ class IrModelAccess(models.Model):
     @api.model
     @tools.ormcache("self.env.uid", "model_name")
     def _check_duplicate_access_cached(self, model_name):
-        user = self.env.user.sudo()
-        group_ids = user.groups_id.ids
+        group_ids = self.env.user._get_group_ids()
         domain = [
             ("model_id.model", "=", model_name),
-            ("active", "=", True),
             ("perm_duplicate", "=", True),
             "|",
             ("group_id", "=", False),
             ("group_id", "in", group_ids),
         ]
-        return self.sudo().search_count(domain) > 0
+        return self.sudo().search_count(domain)
 
     @api.model
-    def check_duplicate_access(self, model_name, raise_exception=True):
+    def _check_duplicate_access(self, model_name, raise_exception=True):
         """Check if the current user has permission to duplicate (perm_duplicate) for model_name."""
         if self.env.su:
             return True
         has_duplicate = self._check_duplicate_access_cached(model_name)
         if not has_duplicate and raise_exception:
             raise AccessError(
-                _("You are not allowed to duplicate records of model %s.") % model_name
+                self.env._("You are not allowed to duplicate records of model %s.")
+                % model_name
             )
         return has_duplicate

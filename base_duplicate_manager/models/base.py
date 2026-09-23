@@ -8,5 +8,5 @@ class Base(models.AbstractModel):
     _inherit = "base"
 
     def copy(self, default=None):
-        self.env["ir.model.access"].check_duplicate_access(self._name)
+        self.env["ir.model.access"]._check_duplicate_access(self._name)
         return super().copy(default=default)
