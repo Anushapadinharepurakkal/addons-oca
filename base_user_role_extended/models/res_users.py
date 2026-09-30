@@ -27,11 +27,12 @@ class ResUsers(models.Model):
             return super(ResUsers, users_to_update).set_groups_from_roles(force=force)
         return True
 
-    @tools.ormcache("self.id", "self.env.uid")
+    @tools.ormcache("self.id", "self.env.uid", "self.env.context.get('role')")
     def _get_group_ids(self):
-        if not self.bypass_role_policy:
-            enabled_roles = self._get_enabled_roles()
-            if enabled_roles:
-                groups = enabled_roles.mapped("role_id.group_id")
-                return groups._ids
+        if self.env.context.get("role"):
+            if not self.bypass_role_policy:
+                enabled_roles = self._get_enabled_roles()
+                if enabled_roles:
+                    groups = enabled_roles.mapped("role_id.group_id")
+                    return groups._ids
         return super()._get_group_ids()
