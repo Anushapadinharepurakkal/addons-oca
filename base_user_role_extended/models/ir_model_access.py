@@ -1,11 +1,19 @@
 # Copyright 2026 CIT Services
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import api, models
+from odoo import api, models, tools
 
 
 class IrModelAccess(models.Model):
     _inherit = "ir.model.access"
+
+    @tools.ormcache("self.env.uid", "mode")
+    def _get_allowed_models(self, mode="read"):
+        """
+        Override to enforce exclusive role-based model access.
+        """
+        self = self.with_context(role=True)
+        return super()._get_allowed_models(mode)
 
     # Handle access rights changes from the respective groups,
     # such as create, update, and deletion of access rights
